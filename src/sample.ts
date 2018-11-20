@@ -58,7 +58,7 @@ createReducer(initialState)
         id:
           state.todos.reduce((maxId, todo) => Math.max(todo.id, maxId), -1) + 1,
         completed: false,
-        text: text,
+        text,
       },
     ],
   }))
@@ -69,7 +69,7 @@ createReducer(initialState)
       .push(addTodo, ({ text }, state, action) => ({
         id: state.reduce((maxId, todo) => Math.max(todo.id, maxId), -1) + 1,
         completed: false,
-        text: text,
+        text,
       }))
       .reject(deleteTodo, ({ id }) => item => item.id === id)
       .map(editTodo, ({ id, text }) => todo =>
@@ -96,7 +96,7 @@ createReducer(initialState.todos)
   .push(addTodo, ({ text }, state) => ({
     id: state.reduce((maxId, todo) => Math.max(todo.id, maxId), -1) + 1,
     completed: false,
-    text: text,
+    text,
   }))
   .reject(deleteTodo, ({ id }) => item => item.id === id)
   .map(editTodo, ({ id, text }) => todo =>
