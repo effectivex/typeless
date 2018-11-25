@@ -1,6 +1,6 @@
-import { AnyAction } from 'redux';
+import { ActionLike } from './types';
 
-export const isAction = (action: any): action is AnyAction => {
+export const isAction = (action: any): action is ActionLike => {
   return action && typeof (action as any).type === 'string';
 };
 

@@ -2,11 +2,11 @@ import { Observable, ObservableInput, OperatorFunction } from 'rxjs';
 import { AnyAction } from 'redux';
 import { Epic } from './redux-observable/createEpicMiddleware';
 
-// export type ActionLike = { type?: string; payload?: any; meta?: any };
+export type ActionLike = { type?: string; payload?: any; meta?: any };
 
 export type AC = (...args: any[]) => any;
 
-export type EpicResult = Observable<AnyAction> | AnyAction | AnyAction[];
+export type EpicResult = Observable<ActionLike> | ActionLike | ActionLike[];
 
 export type ExtractPayload<T> = T extends { payload: infer P } ? P : null;
 

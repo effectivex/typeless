@@ -6,7 +6,13 @@
 import { Subject, Observable, from, queueScheduler } from 'rxjs';
 import { map, switchMap, observeOn, subscribeOn } from 'rxjs/operators';
 import { StateObservable } from './StateObservable';
-import { Store, Middleware, AnyAction } from 'redux';
+import { Store, Middleware } from 'redux';
+
+interface AnyAction {
+  type?: string;
+  payload?: any;
+  meta?: any;
+}
 
 export type Epic<S, D = any> = (
   action$: Observable<AnyAction>,
@@ -50,7 +56,7 @@ export function createEpicMiddleware<S, D>(
     );
 
     result$.subscribe(value => {
-      store.dispatch(value);
+      store.dispatch(value as any);
     });
 
     return next => {
