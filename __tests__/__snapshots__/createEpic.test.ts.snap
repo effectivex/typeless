@@ -160,3 +160,44 @@ Array [
   ],
 ]
 `;
+
+exports[`should load user with filter 1`] = `
+Array [
+  Object {
+    "payload": Object {
+      "id": "test",
+    },
+    "type": "ns/LOAD_USER_FILTER",
+  },
+  Object {
+    "payload": Object {
+      "user": Object {
+        "id": "test",
+        "name": "user",
+      },
+    },
+    "type": "ns/USER_LOADED",
+  },
+]
+`;
+
+exports[`should load user with filter 2`] = `
+Array [
+  Array [
+    "test",
+  ],
+]
+`;
+
+exports[`should load user with filter if the filter does not match 1`] = `
+Array [
+  Object {
+    "payload": Object {
+      "id": "abc",
+    },
+    "type": "ns/LOAD_USER_FILTER",
+  },
+]
+`;
+
+exports[`should load user with filter if the filter does not match 2`] = `Array []`;

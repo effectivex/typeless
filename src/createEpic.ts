@@ -1,139 +1,244 @@
-import * as Rx from 'rxjs/operators'
-import { of } from 'rxjs/observable/of'
-import { from } from 'rxjs/observable/from'
-import { empty } from 'rxjs/observable/empty'
-import { Action, ActionCreator, MiddlewareAPI } from 'redux'
-import { OperatorFunction } from 'rxjs/interfaces'
-import { Observable } from 'rxjs'
-import { ExtractPayload, AC } from './createReducer'
-import { ObservableInput } from 'rxjs/Observable'
-import { combineEpics, Epic, ActionsObservable } from 'redux-observable'
-import { ofType } from './ofType'
+import { from, of, empty, Observable } from 'rxjs';
+import * as Rx from 'rxjs/operators';
+import {
+  AC,
+  EpicHandler,
+  EpicOperator,
+  DefaultDeps,
+  DefaultState,
+} from './types';
+import { Epic } from './redux-observable/createEpicMiddleware';
+import { ofType } from './ofType';
+import { isAction, logAction } from './utils';
+import { combineEpics } from './redux-observable/combineEpics';
+import { StateObservable } from './redux-observable/StateObservable';
 
-export type ExtractAction<T> = T extends { payload: infer P } ? P : null
-
-export type AnyAction = { payload?: any }
-
-export type EpicHandler<TAC extends ActionCreator<any>, TState, TDeps> = (
-  payload: ExtractPayload<ReturnType<TAC>>,
-  deps: TDeps & { getState: () => TState; action$: Observable<Action> },
-  action: ReturnType<TAC> & { type: string }
-) => Observable<{ payload?: any }> | AnyAction | AnyAction[]
-
-export type EpicOperator = <T, R>(
-  project: (value: T, index: number) => ObservableInput<R>
-) => OperatorFunction<T, R>
-
-export type EpicOn<TState, TDeps> = {
-  <TAC extends AC>(
-    ac: TAC,
-    handler: EpicHandler<TAC, TState, TDeps>
-  ): EpicChain<TState, TDeps>
-  <TAC extends AC, TAC2 extends AC>(
+export interface EpicChain<TState, TDeps> extends Epic<TState, TDeps> {
+  on<TAC extends AC>(ac: TAC, handler: EpicHandler<TAC, TState, TDeps>): this;
+  onMany<TAC extends AC, TAC2 extends AC>(
     ac: [TAC, TAC2],
     handler: EpicHandler<TAC | TAC2, TState, TDeps>
-  ): EpicChain<TState, TDeps>
-  <TAC extends AC, TAC2 extends AC, TAC3 extends AC>(
+  ): this;
+  onMany<TAC extends AC, TAC2 extends AC, TAC3 extends AC>(
     ac: [TAC, TAC2, TAC3],
     handler: EpicHandler<TAC | TAC2 | TAC3, TState, TDeps>
-  ): EpicChain<TState, TDeps>
-  <TAC extends AC, TAC2 extends AC, TAC3 extends AC, TAC4 extends AC>(
+  ): this;
+  onMany<TAC extends AC, TAC2 extends AC, TAC3 extends AC, TAC4 extends AC>(
     ac: [TAC, TAC2, TAC3, TAC4],
     handler: EpicHandler<TAC | TAC2 | TAC3 | TAC4, TState, TDeps>
-  ): EpicChain<TState, TDeps>
-  <TAC extends AC>(
-    ac: TAC,
-    operator: EpicOperator,
-    handler: EpicHandler<TAC, TState, TDeps>
-  ): EpicChain<TState, TDeps>
+  ): this;
+  onMany<
+    TAC extends AC,
+    TAC2 extends AC,
+    TAC3 extends AC,
+    TAC4 extends AC,
+    TAC5 extends AC
+  >(
+    ac: [TAC, TAC2, TAC3, TAC4, TAC5],
+    handler: EpicHandler<TAC | TAC2 | TAC3 | TAC4 | TAC5, TState, TDeps>
+  ): this;
+  attach(
+    epic: Array<Epic<TState, TDeps>> | Epic<TState, TDeps>
+  ): EpicChain<TState, TDeps>;
 }
 
-export interface EpicChain<TState, TDeps> extends Epic<any, TState, TDeps> {
-  on: EpicOn<TState, TDeps>
-  attach: (
-    epic: Epic<any, TState, TDeps> | Array<Epic<any, TState, TDeps>>
-  ) => EpicChain<TState, TDeps>
-}
+// export class EpicChain2<TState, TDeps> {
+//   private epics: Epic<TState, TDeps>[] = [];
 
-type AnyEpic = Epic<any, any, any>
+//   constructor(private name: string) {}
 
-const isAction = (action: any): action is AnyAction => {
-  return action && typeof (action as any).type === 'string'
-}
+//   on<TAC extends AC>(ac: TAC, handler: EpicHandler<TAC, TState, TDeps>) {
+//     return this.add(ac, Rx.mergeMap, handler);
+//   }
 
-export function createEpic<TState, TDeps = {}>(): EpicChain<TState, TDeps> {
-  const epics: AnyEpic[] = []
-  let epic: AnyEpic = null
+//   onMany<TAC extends AC, TAC2 extends AC>(
+//     ac: [TAC, TAC2],
+//     handler: EpicHandler<TAC | TAC2, TState, TDeps>
+//   ): this;
+//   onMany<TAC extends AC, TAC2 extends AC, TAC3 extends AC>(
+//     ac: [TAC, TAC2, TAC3],
+//     handler: EpicHandler<TAC | TAC2 | TAC3, TState, TDeps>
+//   ): this;
+//   onMany<TAC extends AC, TAC2 extends AC, TAC3 extends AC, TAC4 extends AC>(
+//     ac: [TAC, TAC2, TAC3, TAC4],
+//     handler: EpicHandler<TAC | TAC2 | TAC3 | TAC4, TState, TDeps>
+//   ): this;
+//   onMany<
+//     TAC extends AC,
+//     TAC2 extends AC,
+//     TAC3 extends AC,
+//     TAC4 extends AC,
+//     TAC5 extends AC
+//   >(
+//     ac: [TAC, TAC2, TAC3, TAC4, TAC5],
+//     handler: EpicHandler<TAC | TAC2 | TAC3 | TAC4 | TAC5, TState, TDeps>
+//   ): this;
+//   onMany(ac: AC[], handler: EpicHandler<AC, TState, TDeps>) {
+//     return this.add(ac, Rx.mergeMap, handler);
+//   }
+
+//   private add(
+//     ac: AC | AC[],
+//     operator: EpicOperator,
+//     handler: EpicHandler<AC, TState, TDeps>
+//   ) {
+//     this.epics.push((action$, state$, deps: any = {}) => {
+//       let sourceAction: any;
+//       return action$.pipe(
+//         ofType(ac as any),
+//         Rx.tap(action => {
+//           if (process.env.NODE_ENV === 'development') {
+//             logAction(this.name, action);
+//           }
+//         }),
+//         operator(action => {
+//           sourceAction = action;
+//           const result = handler(
+//             action.payload,
+//             {
+//               action$,
+//               getState: () => state$.value,
+//               state$,
+//               ...deps,
+//             },
+//             action
+//           );
+//           if (Array.isArray(result)) {
+//             return from(result);
+//           }
+//           if (isAction(result)) {
+//             return of(result);
+//           }
+//           return result;
+//         }),
+//         Rx.catchError(e => {
+//           console.error('Unhandled epic error on action.', {
+//             sourceAction,
+//             epic: name,
+//           });
+//           console.error(e.stack);
+//           return empty();
+//         }),
+//         Rx.mergeMap((action: any) => {
+//           if (action == null) {
+//             console.error('Undefined action returned in epic.', {
+//               sourceAction,
+//               epic: name,
+//             });
+//             return empty();
+//           }
+//           if (!isAction(action)) {
+//             console.error('Invalid action returned in epic.', {
+//               sourceAction,
+//               action,
+//               epic: name,
+//             });
+//             return empty();
+//           }
+//           return of(action);
+//         })
+//       );
+//     });
+//     return this;
+//   }
+// }
+
+export const createEpic = <TState = DefaultState, TDeps = DefaultDeps>(
+  name: string
+) => {
+  const epics: Epic<any, any>[] = [];
+  let epic: Epic<any, any> = null;
+
   const chain: any = (
-    action$: ActionsObservable<any>,
-    store: MiddlewareAPI<any>,
+    action$: Observable<any>,
+    state$: StateObservable<any>,
     dependencies: any
   ) => {
     if (!epic) {
-      epic = combineEpics(...epics)
+      epic = combineEpics(...epics) as any;
     }
-    return epic(action$, store, dependencies)
-  }
-  chain.on = <TAC extends ActionCreator<any>>(
-    ac: TAC,
-    opOrHandler: EpicOperator | EpicHandler<TAC, TState, TDeps>,
-    handlerOrNull: EpicHandler<TAC, TState, TDeps> | null
+    return epic(action$, state$, dependencies);
+  };
+
+  const add = (
+    ac: AC | AC[],
+    operator: EpicOperator,
+    handler: EpicHandler<AC, TState, TDeps>
   ) => {
-    const operator = handlerOrNull ? (opOrHandler as EpicOperator) : Rx.mergeMap
-    const handler = (handlerOrNull
-      ? handlerOrNull
-      : opOrHandler) as EpicHandler<TAC, TState, TDeps>
-    epics.push((action$, { getState }, deps: any = {}) => {
-      let sourceAction: any
+    epics.push((action$, state$, deps: any = {}) => {
+      let sourceAction: any;
       return action$.pipe(
-        ofType(ac),
+        ofType(ac as any),
+        Rx.tap(action => {
+          if (process.env.NODE_ENV === 'development') {
+            logAction(name, action);
+          }
+        }),
         operator(action => {
-          sourceAction = action
+          sourceAction = action;
           const result = handler(
             action.payload,
             {
               action$,
-              getState,
+              getState: () => state$.value,
+              state$,
               ...deps,
             },
             action
-          )
+          );
           if (Array.isArray(result)) {
-            return from(result)
+            return from(result);
           }
           if (isAction(result)) {
-            return of(result)
+            return of(result);
           }
-          return result
+          return result;
         }),
         Rx.catchError(e => {
-          console.error('Unhandled epic error on action.', { sourceAction })
-          console.error(e.stack)
-          return empty()
+          console.error('Unhandled epic error on action.', {
+            sourceAction,
+            epic: name,
+          });
+          console.error(e.stack);
+          return empty();
         }),
         Rx.mergeMap((action: any) => {
           if (action == null) {
             console.error('Undefined action returned in epic.', {
               sourceAction,
-            })
-            return empty()
+              epic: name,
+            });
+            return empty();
           }
           if (!isAction(action)) {
             console.error('Invalid action returned in epic.', {
               sourceAction,
               action,
-            })
-            return empty()
+              epic: name,
+            });
+            return empty();
           }
-          return of(action)
+          return of(action);
         })
-      )
-    })
-    return chain
-  }
+      );
+    });
+    return chain;
+  };
+
+  chain.on = <TAC extends AC>(
+    ac: TAC,
+    handler: EpicHandler<TAC, TState, TDeps>
+  ) => {
+    return add(ac, Rx.mergeMap, handler);
+  };
+
+  chain.onMany = (ac: AC[], handler: EpicHandler<AC, TState, TDeps>) => {
+    return add(ac, Rx.mergeMap, handler);
+  };
+
   chain.attach = (newEpic: any | any[]) => {
-    epics.push(...(Array.isArray(newEpic) ? newEpic : [newEpic]))
-    return chain
-  }
-  return chain
-}
+    epics.push(...(Array.isArray(newEpic) ? newEpic : [newEpic]));
+    return chain;
+  };
+  return chain;
+};

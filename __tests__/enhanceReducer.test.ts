@@ -13,7 +13,7 @@ it('should enhance reducers', () => {
     },
     (state, action) => {
       return state + action.payload;
-    },
+    }
   );
   const newState = reducer(1, { type: 'foo', payload: 10 });
   expect(newState).toBe(11);
@@ -33,7 +33,7 @@ it('should enhance reducers without calling base reducer', () => {
     },
     (state, action) => {
       return state + action.payload;
-    },
+    }
   );
   const newState = reducer(1, { type: 'foo', payload: 10 });
   expect(newState).toBe(100);

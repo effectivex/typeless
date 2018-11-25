@@ -29,6 +29,9 @@ test('action with 2 args', () => {
   const { twoArgs } = createActions('ns', {
     twoArgs: (a: number, b: string) => ({ payload: { a, b } }),
   });
-  expect(twoArgs(1, 'foo')).toEqual({ type: 'ns/TWO_ARGS', payload: { a: 1, b: 'foo' } });
+  expect(twoArgs(1, 'foo')).toEqual({
+    type: 'ns/TWO_ARGS',
+    payload: { a: 1, b: 'foo' },
+  });
   expect(twoArgs.toString()).toEqual('ns/TWO_ARGS');
 });

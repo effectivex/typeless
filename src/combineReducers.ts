@@ -7,7 +7,7 @@ export type ConvertReducerMapToState<T> = {
 };
 
 export function combineReducers<TMap extends { [k: string]: Reducer<any> }>(
-  map: TMap,
+  map: TMap
 ): Reducer<ConvertReducerMapToState<TMap>> {
   return baseCombineReducers(map) as any;
 }
