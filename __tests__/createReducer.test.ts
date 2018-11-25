@@ -31,8 +31,8 @@ describe('on', () => {
         state.n = 1456;
       }
     );
-    const state = reducer(undefined, textAction('text'));
-    expect(state).toEqual({
+    const ret = reducer(undefined, textAction('text'));
+    expect(ret).toEqual({
       ...getInitialState(),
       str: 'text',
       n: 1456,
@@ -44,7 +44,7 @@ describe('replace', () => {
   it('should set values', () => {
     const reducer = createReducer(getInitialState()).replace(
       textAction,
-      (state, { text }, action) => {
+      (_, { text }, action) => {
         return {
           ...getInitialState(),
           str: text,
@@ -98,11 +98,11 @@ describe('nested', () => {
           state.n = 1456;
         })
     );
-    const state = reducer(undefined, textAction('text'));
+    const ret = reducer(undefined, textAction('text'));
     const expected = getInitialStateNested();
     expected.inner.prop = 'text';
     expected.inner.n = 1456;
-    expect(state).toEqual(expected);
+    expect(ret).toEqual(expected);
   });
 
   it('with non nested action', () => {
@@ -116,12 +116,12 @@ describe('nested', () => {
           state.n = 1456;
         })
       );
-    const state = reducer(undefined, textAction('text'));
+    const ret = reducer(undefined, textAction('text'));
     const expected = getInitialStateNested();
     expected.str = 'text';
     expected.inner.prop = 'text';
     expected.inner.n = 1456;
-    expect(state).toEqual(expected);
+    expect(ret).toEqual(expected);
   });
 });
 

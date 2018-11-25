@@ -45,7 +45,7 @@ export interface EpicChain<TState, TDeps> extends Epic<TState, TDeps> {
 export const createEpic = <TState = DefaultState, TDeps = DefaultDeps>(
   name: string
 ): EpicChain<TState, TDeps> => {
-  const epics: Epic<any, any>[] = [];
+  const epics: Array<Epic<any, any>> = [];
   let epic: Epic<any, any> = null;
 
   const chain: any = (
