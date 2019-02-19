@@ -1,6 +1,8 @@
 import { snakeCase } from './utils';
 
-export type AnyFn = ((...args: any[]) => any);
+export type Nullable<T> = T | null;
+
+export type AnyFn = (...args: any[]) => any;
 
 export type ConvertAC<T> = false extends T
   ? () => {}
@@ -9,8 +11,6 @@ export type ConvertAC<T> = false extends T
   : () => {};
 
 export type ConvertActions<T> = { [P in keyof T]: ConvertAC<T[P]> };
-
-export type Nullable<T> = T | null;
 
 export type ActionMap = { [name: string]: Nullable<(...args: any[]) => {}> };
 

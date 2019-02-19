@@ -1,6 +1,6 @@
 {
   "name": "typeless",
-  "version": "0.0.2",
+  "version": "0.0.1",
   "description": "",
   "main": "src/index.ts",
   "scripts": {
@@ -13,8 +13,9 @@
   },
   "jest": {
     "transform": {
-      ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+      ".(ts|tsx)": "<rootDir>/../../node_modules/ts-jest/preprocessor.js"
     },
+    "testURL": "http://localhost",
     "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$",
     "moduleFileExtensions": [
       "ts",
@@ -38,8 +39,7 @@
     "@types/jest": "^22.0.0",
     "@types/node": "^10.12.10",
     "@types/redux-mock-store": "^1.0.0",
-    "@types/react": "^16.7.7",
-    "@types/react-redux": "^6.0.10",
+    "@types/react": "^16.8.3",
     "jest": "^22.0.2",
     "redux": "^4.0.1",
     "redux-mock-store": "^1.5.3",
@@ -48,15 +48,13 @@
     "ts-jest": "^22.0.0",
     "ts-node": "^5.0.1",
     "tslint": "5.11.0",
-    "typescript": "^3.1.6",
-    "react": "^16.6.3",
-    "react-redux": "^5.1.1"
+    "typescript": "^3.3.3",
+    "react": "^16.8.2"
   },
   "peerDependencies": {
     "redux": "^4.0.1",
     "rxjs": "^6.3.3",
-    "react": "^16.6.3",
-    "react-redux": "^5.1.1"
+    "react": "^16.8.2"
   },
   "dependencies": {
     "immer": "^1.8.0"
