@@ -50,7 +50,7 @@ const epicMiddleware = createEpicMiddleware(rootEpic);
 
 const store = createStore(
   rootReducer.getReducer(),
-  applyMiddleware(...middleware)
+  applyMiddleware(epicMiddleware)
 );
 
 ReactDOM.render(
@@ -70,11 +70,17 @@ ReactDOM.render(
 
 ```tsx
 // App.tsx
-
 import React from 'react';
 import { of } from 'rxjs';
 import { delay } from 'rxjs/operators';
-import { createActions, useModule, createEpic, createReducer, useActions, useMappedState} from 'typeless';
+import {
+  createActions,
+  useModule,
+  createEpic,
+  createReducer,
+  useActions,
+  useMappedState,
+} from 'typeless';
 
 // Module name must be unique
 // It's used as a prefix in actions and for logging in epics
@@ -88,11 +94,9 @@ const MyActions = createActions(MODULE, {
 });
 
 // Create Epic for side effects
-// Listen for `ping` and dispatch `pong` with 500ms delay
 const epic = createEpic(MODULE)
-  .on(MyActions.ping, () =>
-    of(MyActions.pong(new Date())).pipe(delay(500))
-  );
+  // Listen for `ping` and dispatch `pong` with 500ms delay
+  .on(MyActions.ping, () => of(MyActions.pong(new Date())).pipe(delay(500)));
 
 // Redux stats for this module
 interface SampleState {
@@ -104,7 +108,7 @@ interface SampleState {
 // This is a global redux state
 declare module 'typeless/types' {
   interface DefaultState {
-    sample: SampleState
+    sample: SampleState;
   }
 }
 
