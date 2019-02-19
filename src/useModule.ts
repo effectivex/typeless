@@ -1,9 +1,8 @@
-import { ChainedReducer } from './ChainedReducer';
 import React, { useEffect, useContext, useMemo } from 'react';
 import { TypelessContext } from './TypelessContext';
 import { Epic } from './Epic';
 import { getIsHmr } from './onHmr';
-import { AC } from './types';
+import { AC, Reducer } from './types';
 
 interface BaseLoaderOptions<TState> {
   children?: React.ReactChild;
@@ -18,7 +17,7 @@ interface BaseLoaderOptions<TState> {
 
 export interface ModuleLoaderOptions<TState, TPathA extends keyof TState>
   extends BaseLoaderOptions<TState> {
-  reducer: ChainedReducer<TState[TPathA]>;
+  reducer: Reducer<TState[TPathA]>;
   reducerPath: [TPathA];
 }
 
@@ -27,7 +26,7 @@ export interface ModuleLoaderOptions2<
   TPathA extends keyof TState,
   TPathB extends keyof TState[TPathA]
 > extends BaseLoaderOptions<TState> {
-  reducer: ChainedReducer<TState[TPathA][TPathB]>;
+  reducer: Reducer<TState[TPathA][TPathB]>;
   reducerPath: [TPathA, TPathB];
 }
 

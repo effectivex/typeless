@@ -1,6 +1,5 @@
-import { AnyAction, Reducer } from 'redux';
 import { withBatch } from './withBatch';
-import { DefaultState } from './types';
+import { DefaultState, Reducer, ActionLike } from './types';
 
 type AnyObject = {
   [x: string]: any;
@@ -33,7 +32,7 @@ function removeAtPath(obj: AnyObject, path: string[]) {
 function applyReducerTree(
   state: AnyObject,
   tree: AnyObject,
-  action: AnyAction
+  action: ActionLike
 ) {
   let newState = state;
   let isModified = false;
@@ -66,7 +65,7 @@ export class RootReducer<TState = DefaultState> {
   }
 
   getReducer() {
-    return withBatch((state: TState, action: AnyAction) =>
+    return withBatch((state: TState, action: ActionLike) =>
       applyReducerTree(state, this.tree, action)
     );
   }

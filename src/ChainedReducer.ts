@@ -1,6 +1,12 @@
-import { Reducer, AnyAction } from 'redux';
 import { produce } from 'immer';
-import { AC, Flatten, ExtractPayload } from './types';
+import {
+  AC,
+  Flatten,
+  ExtractPayload,
+  Reducer,
+  ReducerMap,
+  ActionLike,
+} from './types';
 import { toArray } from './utils';
 
 export type OnHandler<S, T extends AC> = (
@@ -20,14 +26,10 @@ export type AttachFn<S> = {
   (fn: Reducer<S>): ChainedReducer<S>;
 };
 
-export type ReducerMap<S> = {
-  [action: string]: Array<(state: S, action: AnyAction) => S>;
-};
-
 const createNestedReducer = <S, P extends keyof S>(
   prop: P,
   reducer: Reducer<S[P]>
-) => (state: S, action: AnyAction) => {
+): Reducer<S> => (state, action) => {
   const subState = reducer(state[prop], action);
   if (state[prop] !== subState) {
     return {
@@ -40,7 +42,7 @@ const createNestedReducer = <S, P extends keyof S>(
 
 export class ChainedReducer<S> {
   private reducerMap: ReducerMap<S>;
-  private defaultReducers: Array<(state: S, action: AnyAction) => S>;
+  private defaultReducers: Array<Reducer<S>>;
   private reducer: ChainedReducer<S> & Reducer<S>;
 
   constructor(private initial: S) {
@@ -79,8 +81,8 @@ export class ChainedReducer<S> {
     return this.asReducer();
   }
 
-  mergePayload(actionCreators: AC, fn: OnHandler<S, AC>) {
-    this.transform(actionCreators, (state, action: AnyAction) =>
+  mergePayload(actionCreators: AC) {
+    this.transform(actionCreators, (state, action: any) =>
       Object.assign({}, state, action.payload)
     );
     return this.asReducer();
@@ -115,7 +117,7 @@ export class ChainedReducer<S> {
   }
 
   private getReducer() {
-    return (state: S = this.initial, action: AnyAction) => {
+    return (state: S = this.initial, action: ActionLike) => {
       const reducers = (this.reducerMap[action.type] || []).concat(
         this.defaultReducers
       );
@@ -128,7 +130,7 @@ export class ChainedReducer<S> {
 
   private transform(
     actionCreators: AC | AC[],
-    reducerFn: (state: S, action: AnyAction) => S
+    reducerFn: (state: S, action: ActionLike) => S
   ) {
     const actionTypes = toArray(actionCreators).map(ac => ac.toString());
     actionTypes.forEach(action => {

@@ -16,6 +16,12 @@ export interface Deps<TState> {
 
 export type Flatten<T> = { [K in keyof T]: T[K] };
 
+export type Reducer<S = any> = (state: S | undefined, action: ActionLike) => S;
+
+export type ReducerMap<S> = {
+  [action: string]: Array<Reducer<S>>;
+};
+
 export interface DefaultState {
   //
 }

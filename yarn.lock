@@ -2683,6 +2683,11 @@ redux-mock-store@^1.5.3:
   dependencies:
     lodash.isplainobject "^4.0.6"
 
+redux-react-hook@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/redux-react-hook/-/redux-react-hook-3.1.0.tgz#cafc0fb4b2bf8512791ee2efb965cb9babca69d7"
+  integrity sha512-uey8v7ZXFcWon9zthM01HPNdg6C3Twn1WctCb7XRFO47iGbQnX/NUpcKMKpTKNC9DC+Dx6IjfYiOwI+11zHeaw==
+
 redux@^4.0.0, redux@^4.0.1:
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/redux/-/redux-4.0.1.tgz#436cae6cc40fbe4727689d7c8fae44808f1bfef5"
