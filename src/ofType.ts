@@ -53,7 +53,7 @@ export type OfType = {
   >;
 };
 
-const getType = (ac: any) => (ac.getType ? ac.getType() : ac.toString());
+const getType = (ac: any) => ac.toString();
 
 export const ofType: OfType = (ac: AC | AC[]) => {
   if (Array.isArray(ac)) {

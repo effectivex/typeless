@@ -1,12 +1,12 @@
-import { Reducer, Action, AnyAction } from 'redux';
+import { Reducer, ActionLike } from './types';
 import { batchUpdate } from './actions';
 
 export const withBatch = <S>(baseReducer: Reducer<S>) => (
   state: S,
-  action: AnyAction
+  action: ActionLike
 ) => {
   if (action.type === batchUpdate.toString()) {
-    return (action.payload as Action[]).reduce(
+    return (action.payload as ActionLike[]).reduce(
       (currentState, currentAction) => baseReducer(currentState, currentAction),
       state
     );
