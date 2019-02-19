@@ -56,11 +56,9 @@ export function App() {
 
   return (
     <div>
-      {isPinging ? (
-        <button disabled>pinging...</button>
-      ) : (
-        <button onClick={ping}>ping</button>
-      )}
+      <button disabled={isPinging} onClick={ping}>
+        {isPinging ? 'pinging...' : 'ping'}
+      </button>
       {lastPongAt && <div>last pong at {lastPongAt.toLocaleTimeString()}</div>}
     </div>
   );

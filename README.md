@@ -125,7 +125,7 @@ const reducer = createReducer(initialState)
     state.lastPongAt = date;
   });
 
-// Create a stateless component with hook
+// Create a stateless component with hooks
 // NOTE: there are no type annotations, and the below code is 100% type safe!
 export function App() {
   // load epic and reducer to the store
@@ -142,11 +142,9 @@ export function App() {
 
   return (
     <div>
-      {isPinging ? (
-        <button disabled>pinging...</button>
-      ) : (
-        <button onClick={ping}>ping</button>
-      )}
+      <button disabled={isPinging} onClick={ping}>
+        {isPinging ? 'pinging...' : 'ping'}
+      </button>
       {lastPongAt && <div>last pong at {lastPongAt.toLocaleTimeString()}</div>}
     </div>
   );
