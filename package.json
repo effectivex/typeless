@@ -1,6 +1,6 @@
 {
   "name": "typeless",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "description": "",
   "main": "index.js",
   "module": "es/index.js",
@@ -11,6 +11,16 @@
     "jest": "jest",
     "test": "yarn run lint && tsc --noEmit && yarn run jest --coverage --no-cache"
   },
+  "author": "Łukasz Sentkiewicz <lukasz@sentkiewicz.pl>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BetterCallSky/typeless.git"
+  },
+  "bugs": {
+    "url": "https://github.com/BetterCallSky/typeless/issues"
+  },
+  "homepage": "https://github.com/BetterCallSky/typeless#readme",
   "jest": {
     "transform": {
       ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"

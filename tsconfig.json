@@ -22,6 +22,7 @@
     "noImplicitThis": true,
     "noUnusedLocals": true,
     "strictNullChecks": false,
+    "esModuleInterop": true,
     "strict": false,
     "pretty": true,
     "removeComments": true,
