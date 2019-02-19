@@ -2,14 +2,14 @@
   "name": "typeless",
   "version": "0.0.1",
   "description": "",
-  "main": "src/index.ts",
+  "main": "index.js",
+  "module": "es/index.js",
+  "jsnext:main": "es/index.js",
+  "sideEffects": false,
   "scripts": {
     "lint": "tslint -t codeFrame 'src/**/*.ts' '__tests__/**/*.ts'",
-    "prebuild": "rimraf dist",
-    "build": "tsc -p . --declaration",
     "jest": "jest",
-    "test": "yarn run lint && tsc --noEmit && yarn run jest --coverage --no-cache",
-    "deploy-docs": "ts-node tools/gh-pages-publish"
+    "test": "yarn run lint && tsc --noEmit && yarn run jest --coverage --no-cache"
   },
   "jest": {
     "transform": {

@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "baseUrl": "./",
+    "baseUrl": "./src",
     "allowSyntheticDefaultImports": true, // no errors on commonjs default import
     "allowJs": false, // include js files
     "checkJs": false, // typecheck js files
@@ -27,5 +27,6 @@
     "removeComments": true,
     "sourceMap": true,
     "rootDirs": ["node_modules"]
-  }
+  },
+  "include": ["src"]
 }
