@@ -1,6 +1,6 @@
+import { nothing } from 'immer';
 import { createReducer } from '../src/createReducer';
 import { createActions } from '../src/createActions';
-import { nothing } from 'immer';
 
 const getInitialState = () => ({
   str: 'foo',
@@ -11,10 +11,15 @@ const getInitialState = () => ({
   },
 });
 
-const { textAction, strAction } = createActions('ns', {
-  textAction: (text: string) => ({ payload: { text } }),
-  strAction: (str: string) => ({ payload: { str } }),
-});
+const { textAction, textAction2, textAction3, strAction } = createActions(
+  'ns',
+  {
+    textAction: (text: string) => ({ payload: { text } }),
+    textAction2: (text: string) => ({ payload: { text } }),
+    textAction3: (text: string) => ({ payload: { text } }),
+    strAction: (str: string) => ({ payload: { str } }),
+  }
+);
 
 it('no actions', () => {
   const reducer = createReducer(getInitialState());
@@ -23,19 +28,57 @@ it('no actions', () => {
 });
 
 describe('on', () => {
-  it('should set values', () => {
-    const reducer = createReducer(getInitialState()).on(
+  function getReducer() {
+    return createReducer(getInitialState()).on(
       textAction,
       (state, { text }, action) => {
         state.str = text;
         state.n = 1456;
       }
     );
+  }
+  it('should set values', () => {
+    const reducer = getReducer();
     const ret = reducer(undefined, textAction('text'));
     expect(ret).toEqual({
       ...getInitialState(),
       str: 'text',
       n: 1456,
+    });
+  });
+  it('should ignore action', () => {
+    const reducer = getReducer();
+    const ret = reducer(undefined, textAction2('text'));
+    expect(ret).toEqual({
+      ...getInitialState(),
+    });
+  });
+});
+
+describe('onMany', () => {
+  function getReducer() {
+    return createReducer(getInitialState()).onMany(
+      [textAction, textAction2],
+      (state, { text }, action) => {
+        state.str = text;
+        state.n = 1456;
+      }
+    );
+  }
+  it('should set values', () => {
+    const reducer = getReducer();
+    const ret = reducer(undefined, textAction2('text'));
+    expect(ret).toEqual({
+      ...getInitialState(),
+      str: 'text',
+      n: 1456,
+    });
+  });
+  it('should ignore action', () => {
+    const reducer = getReducer();
+    const ret = reducer(undefined, textAction3('text'));
+    expect(ret).toEqual({
+      ...getInitialState(),
     });
   });
 });
@@ -126,8 +169,8 @@ describe('nested', () => {
 });
 
 describe('attach', () => {
-  it('attach custom reducer', () => {
-    const reducer = createReducer(getInitialState()).attach((state, action) => {
+  function getReducer() {
+    return createReducer(getInitialState()).attach((state, action) => {
       if (action.type === textAction.toString()) {
         return {
           ...state,
@@ -136,6 +179,22 @@ describe('attach', () => {
       }
       return state;
     });
+  }
+
+  function getInnerReducer() {
+    return createReducer(getInitialState()).attach('inner', (state, action) => {
+      if (action.type === textAction.toString()) {
+        return {
+          ...state,
+          prop: action.payload.text,
+        };
+      }
+      return state;
+    });
+  }
+
+  it('attach custom reducer', () => {
+    const reducer = getReducer();
     const newState = reducer(undefined, textAction('text'));
     expect(newState).toEqual({
       ...getInitialState(),
@@ -143,24 +202,20 @@ describe('attach', () => {
     });
   });
   it('attach custom reducer on custom path', () => {
-    const reducer = createReducer(getInitialState()).attach(
-      'inner',
-      (state, action) => {
-        if (action.type === textAction.toString()) {
-          return {
-            ...state,
-            prop: action.payload.text,
-          };
-        }
-        return state;
-      }
-    );
+    const reducer = getInnerReducer();
     const newState = reducer(undefined, textAction('text'));
     expect(newState).toEqual({
       ...getInitialState(),
       inner: {
         prop: 'text',
       },
+    });
+  });
+  it('should ignore action', () => {
+    const reducer = getInnerReducer();
+    const ret = reducer(undefined, textAction2('text'));
+    expect(ret).toEqual({
+      ...getInitialState(),
     });
   });
 });
