@@ -1,7 +1,6 @@
-import { AnyAction } from 'redux';
+import { AnyAction, Reducer } from 'redux';
 import { withBatch } from './withBatch';
 import { DefaultState } from './types';
-import { ChainedReducer } from './ChainedReducer';
 
 type AnyObject = {
   [x: string]: any;
@@ -72,7 +71,7 @@ export class RootReducer<TState = DefaultState> {
     );
   }
 
-  addReducer(reducer: ChainedReducer<any>, path: string[]) {
+  addReducer(reducer: Reducer<any>, path: string[]) {
     addAtPath(this.tree, reducer, path);
   }
 

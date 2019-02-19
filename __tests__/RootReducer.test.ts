@@ -1,4 +1,4 @@
-import { createRootReducer } from '../src/createRootReducer';
+import { RootReducer } from '../src/RootReducer';
 import { AnyAction } from 'redux';
 
 const createAddReducer = (initialValue: number) => (
@@ -10,15 +10,18 @@ const createAddReducer = (initialValue: number) => (
   }
   return state;
 };
+
 test('no reducers', () => {
-  const reducer = createRootReducer();
+  const rootReducer = new RootReducer();
+  const reducer = rootReducer.getReducer();
   const state = reducer({}, { type: 'action' });
   expect(state).toEqual({});
 });
 
 test('single reducer', () => {
-  const reducer = createRootReducer();
-  reducer.addReducer(createAddReducer(1), ['foo']);
+  const rootReducer = new RootReducer();
+  rootReducer.addReducer(createAddReducer(1), ['foo']);
+  const reducer = rootReducer.getReducer();
   let newState = reducer({}, { type: 'action' });
   expect(newState).toEqual({
     foo: 1,
@@ -30,13 +33,14 @@ test('single reducer', () => {
 });
 
 test('remove reducer', () => {
-  const reducer = createRootReducer();
-  reducer.addReducer(createAddReducer(1), ['foo']);
+  const rootReducer = new RootReducer();
+  const reducer = rootReducer.getReducer();
+  rootReducer.addReducer(createAddReducer(1), ['foo']);
   let newState = reducer({}, { type: 'action' });
   expect(newState).toEqual({
     foo: 1,
   });
-  reducer.removeReducer(['foo']);
+  rootReducer.removeReducer(['foo']);
   newState = reducer(newState, { type: 'add' });
   expect(newState).toEqual({
     foo: 1,
@@ -44,9 +48,10 @@ test('remove reducer', () => {
 });
 
 test('multiple single reducer', () => {
-  const reducer = createRootReducer();
-  reducer.addReducer(createAddReducer(1), ['foo']);
-  reducer.addReducer(createAddReducer(2), ['bar']);
+  const rootReducer = new RootReducer();
+  const reducer = rootReducer.getReducer();
+  rootReducer.addReducer(createAddReducer(1), ['foo']);
+  rootReducer.addReducer(createAddReducer(2), ['bar']);
   let newState = reducer({}, { type: 'action' });
   expect(newState).toEqual({
     foo: 1,
@@ -60,8 +65,9 @@ test('multiple single reducer', () => {
 });
 
 test('nested reducer', () => {
-  const reducer = createRootReducer();
-  reducer.addReducer(createAddReducer(1), ['foo', 'bar']);
+  const rootReducer = new RootReducer();
+  const reducer = rootReducer.getReducer();
+  rootReducer.addReducer(createAddReducer(1), ['foo', 'bar']);
   let newState = reducer({}, { type: 'action' });
   expect(newState).toEqual({
     foo: { bar: 1 },

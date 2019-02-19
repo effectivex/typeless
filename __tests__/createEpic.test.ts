@@ -1,10 +1,11 @@
 import configureMockStore, { MockStore } from 'redux-mock-store';
-import { createEpicMiddleware } from '../src/redux-observable/createEpicMiddleware';
+import { createEpicMiddleware } from '../src/createEpicMiddleware';
 import * as Rx from 'rxjs/operators';
 import { of, throwError, concat, empty } from 'rxjs';
 import { createActions } from '../src/createActions';
 import { createEpic } from '../src/createEpic';
 import { ofType } from '../src/ofType';
+import { RootEpic } from '../src/RootEpic';
 
 const {
   loadUser,
@@ -30,7 +31,7 @@ const {
   errorOccurred: (message: string) => ({ payload: { message } }),
 });
 
-const APIService = {
+const API = {
   fetchUser: (id: string) => of({ id, name: 'user' }),
   fetchUserDelay: (id: string) => of({ id, name: 'user' }).pipe(Rx.delay(10)),
   deleteUser: (id: string) => of(null),
@@ -39,24 +40,23 @@ const APIService = {
 interface State {
   foo: string;
 }
-type Deps = { API: typeof APIService };
 
-const epic = createEpic<State, Deps>('test')
+const epic = createEpic<State>('test')
   //
-  .on(loadUser, ({ id }, { API }) =>
+  .on(loadUser, ({ id }) =>
     API.fetchUser(id).pipe(
       Rx.map(user => userLoaded(user)),
       Rx.catchError(err => of(errorOccurred(err.message)))
     )
   )
-  .on(loadUserDelay, ({ id }, { API, action$ }) =>
+  .on(loadUserDelay, ({ id }, { action$ }) =>
     API.fetchUserDelay(id).pipe(
       Rx.map(user => userLoaded(user)),
       Rx.catchError(err => of(errorOccurred(err.message))),
       Rx.takeUntil(action$.pipe(ofType(loadUserDelay)))
     )
   )
-  .on(loadUserFilter, ({ id }, { API, action$ }) => {
+  .on(loadUserFilter, ({ id }, { action$ }) => {
     if (id !== 'test') {
       return empty();
     }
@@ -66,7 +66,7 @@ const epic = createEpic<State, Deps>('test')
       Rx.takeUntil(action$.pipe(ofType(loadUserFilter)))
     );
   })
-  .on(deleteUser, ({ id }, { API, action$, getState }) => {
+  .on(deleteUser, ({ id }, { action$ }) => {
     return concat(
       of(showConfirmDelete()),
       action$.pipe(
@@ -91,18 +91,15 @@ const dispatch = (action: any) => store.dispatch(action);
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 beforeEach(() => {
-  APIService.fetchUser = jest.fn((id: string) => of({ id, name: 'user' }));
-  APIService.fetchUserDelay = jest.fn((id: string) =>
+  API.fetchUser = jest.fn((id: string) => of({ id, name: 'user' }));
+  API.fetchUserDelay = jest.fn((id: string) =>
     of({ id, name: 'user' }).pipe(Rx.delay(10))
   );
 
-  APIService.deleteUser = jest.fn((id: string) => of(null));
-
-  const epicMiddleware = createEpicMiddleware<State, Deps>(epic, {
-    dependencies: {
-      API: APIService,
-    },
-  });
+  API.deleteUser = jest.fn((id: string) => of(null));
+  const rootEpic = new RootEpic<State>();
+  rootEpic.addEpic(epic);
+  const epicMiddleware = createEpicMiddleware<State>(rootEpic);
   const mockStore = configureMockStore([epicMiddleware]);
   store = mockStore({});
 });
@@ -111,29 +108,29 @@ test('should load user', () => {
   dispatch(loadUser('123'));
   const actions = store.getActions();
   expect(actions).toMatchSnapshot();
-  expect((APIService.fetchUser as jest.Mock).mock.calls).toMatchSnapshot();
+  expect((API.fetchUser as jest.Mock).mock.calls).toMatchSnapshot();
 });
 
 test('should load user error', () => {
-  APIService.fetchUser = jest.fn((id: string) => throwError(new Error('foo')));
+  API.fetchUser = jest.fn((id: string) => throwError(new Error('foo')));
   dispatch(loadUser('123'));
   const actions = store.getActions();
   expect(actions).toMatchSnapshot();
-  expect((APIService.fetchUser as jest.Mock).mock.calls).toMatchSnapshot();
+  expect((API.fetchUser as jest.Mock).mock.calls).toMatchSnapshot();
 });
 
 test('should load user with filter', () => {
   dispatch(loadUserFilter('test'));
   const actions = store.getActions();
   expect(actions).toMatchSnapshot();
-  expect((APIService.fetchUser as jest.Mock).mock.calls).toMatchSnapshot();
+  expect((API.fetchUser as jest.Mock).mock.calls).toMatchSnapshot();
 });
 
 test('should load user with filter if the filter does not match', () => {
   dispatch(loadUserFilter('abc'));
   const actions = store.getActions();
   expect(actions).toMatchSnapshot();
-  expect((APIService.fetchUser as jest.Mock).mock.calls).toMatchSnapshot();
+  expect((API.fetchUser as jest.Mock).mock.calls).toMatchSnapshot();
 });
 
 test('should load user with delay', async () => {
@@ -143,7 +140,7 @@ test('should load user with delay', async () => {
   await delay(100);
   const actions = store.getActions();
   expect(actions).toMatchSnapshot();
-  expect((APIService.fetchUserDelay as jest.Mock).mock.calls).toMatchSnapshot();
+  expect((API.fetchUserDelay as jest.Mock).mock.calls).toMatchSnapshot();
 });
 
 test('should delete user', async () => {
@@ -151,28 +148,24 @@ test('should delete user', async () => {
   dispatch(confirmDelete('yes'));
   const actions = store.getActions();
   expect(actions).toMatchSnapshot();
-  expect((APIService.deleteUser as jest.Mock).mock.calls).toMatchSnapshot();
+  expect((API.deleteUser as jest.Mock).mock.calls).toMatchSnapshot();
 });
 
 test('attach', () => {
-  const subEpic = createEpic<State, Deps>('test').on(
-    loadUser,
-    ({ id }, { API }) =>
-      API.fetchUser(id).pipe(
-        Rx.map(user => userLoaded(user)),
-        Rx.catchError(err => of(errorOccurred(err.message)))
-      )
+  const subEpic = createEpic<State>('test').on(loadUser, ({ id }) =>
+    API.fetchUser(id).pipe(
+      Rx.map(user => userLoaded(user)),
+      Rx.catchError(err => of(errorOccurred(err.message)))
+    )
   );
-  const mainEpic = createEpic<State, Deps>('test').attach(subEpic);
-  const epicMiddleware = createEpicMiddleware(mainEpic, {
-    dependencies: {
-      API: APIService,
-    },
-  });
+  const mainEpic = createEpic<State>('test').attach(subEpic);
+  const rootEpic = new RootEpic<State>();
+  rootEpic.addEpic(mainEpic);
+  const epicMiddleware = createEpicMiddleware(rootEpic);
   const mockStore = configureMockStore([epicMiddleware]);
   store = mockStore({});
   dispatch(loadUser('123'));
   const actions = store.getActions();
   expect(actions).toMatchSnapshot();
-  expect((APIService.fetchUser as jest.Mock).mock.calls).toMatchSnapshot();
+  expect((API.fetchUser as jest.Mock).mock.calls).toMatchSnapshot();
 });
