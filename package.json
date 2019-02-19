@@ -1,29 +1,21 @@
 {
   "name": "typeless",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "",
-  "main": "index.js",
+  "main": "src/index.ts",
   "scripts": {
     "lint": "tslint -t codeFrame 'src/**/*.ts' '__tests__/**/*.ts'",
     "prebuild": "rimraf dist",
     "build": "tsc -p . --declaration",
     "jest": "jest",
-    "test": "npm run lint && npm run jest -- --coverage --no-cache",
+    "test": "yarn run lint && tsc --noEmit && yarn run jest --coverage --no-cache",
     "deploy-docs": "ts-node tools/gh-pages-publish"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/effectivex/typeless.git"
-  },
-  "author": "Łukasz Sentkiewicz",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/effectivex/typeless/issues"
   },
   "jest": {
     "transform": {
       ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
     },
+    "testURL": "http://localhost",
     "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$",
     "moduleFileExtensions": [
       "ts",
@@ -36,24 +28,36 @@
     ],
     "coverageThreshold": {
       "global": {
-        "branches": 90,
-        "functions": 95,
-        "lines": 95,
-        "statements": 95
+        "branches": 50,
+        "functions": 50,
+        "lines": 50,
+        "statements": 50
       }
     }
   },
-  "homepage": "https://github.com/effectivex/typeless#readme",
   "devDependencies": {
     "@types/jest": "^22.0.0",
+    "@types/node": "^10.12.10",
+    "@types/react": "^16.8.3",
+    "@types/redux-mock-store": "^1.0.0",
     "jest": "^22.0.2",
+    "react": "^16.8.2",
+    "redux": "^4.0.1",
+    "redux-mock-store": "^1.5.3",
     "rimraf": "^2.6.1",
+    "rxjs": "^6.3.3",
     "ts-jest": "^22.0.0",
     "ts-node": "^5.0.1",
-    "tslint": "^5.8.0",
-    "typescript": "^2.8.0-dev.20180315"
+    "tslint": "5.11.0",
+    "typescript": "^3.3.3"
+  },
+  "peerDependencies": {
+    "react": "^16.8.2",
+    "redux": "^4.0.1",
+    "rxjs": "^6.3.3"
   },
   "dependencies": {
-    "snake-case": "^2.1.0"
+    "immer": "^1.8.0",
+    "redux-react-hook": "^3.1.0"
   }
 }

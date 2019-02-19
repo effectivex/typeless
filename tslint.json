@@ -14,6 +14,10 @@
     "quotemark": [true, "single"],
     "arrow-parens": false,
     "max-classes-per-file": false,
-    "max-line-length": 0
+    "trailing-comma": false,
+    "curly": false,
+    "no-empty-interface": false,
+    "prefer-object-spread": false,
+    "max-line-length": false
   }
 }
